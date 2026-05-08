@@ -1,0 +1,18 @@
+THIS FILE IS A PLACEHOLDER.
+
+Replace this file with your trained TFLite model (submission/model.tflite).
+
+Requirements
+------------
+- Format   : TensorFlow Lite (.tflite)
+- File name: model.tflite  (exact name required)
+
+ESP32-S3 constraints (verified automatically by evaluate_constraint.py)
+------------------------------------------------------------------------
+  - Model file size  < 1 MB   (Flash budget)
+  - Tensor arena     < 200 KB (SRAM budget, no external PSRAM)
+  - No LSTM / GRU / RNN operations
+  - INT8 quantization strongly recommended
+
+Run the constraint check before every submission:
+    python evaluation/evaluate_constraint.py --model-path submission/model.tflite

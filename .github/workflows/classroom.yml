@@ -1,0 +1,112 @@
+name: GitHub Classroom Workflow
+
+on:
+  push:
+    branches: [main, master]
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Python setup ────────────────────────────────────────────────────
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -q
+
+      # ── 3. Test: submission files ──────────────────────────────────────────
+      - name: Submission files present
+        id: submission-files
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Submission files present
+          setup-command: ""
+          command: |
+            test -f submission/code.py     || { echo "::error::submission/code.py missing";     exit 1; }
+            test -f submission/model.tflite || { echo "::error::submission/model.tflite missing"; exit 1; }
+          timeout: 10
+          max-score: 0
+
+      # ── 4. Test: report file ───────────────────────────────────────────────
+      - name: Report file present
+        id: report-file
+        if: always()
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Report file present
+          setup-command: ""
+          command: |
+            test -f report/report.pdf || { echo "::error::report/report.pdf missing"; exit 1; }
+          timeout: 10
+          max-score: 0
+
+      # ── 5. Test: ESP32-S3 hardware constraints ─────────────────────────────
+      - name: ESP32-S3 hardware constraints
+        id: esp32-constraints
+        if: always()
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: ESP32-S3 hardware constraints
+          setup-command: ""
+          command: >-
+            python evaluation/evaluate_constraint.py
+            --model-path submission/model.tflite
+          timeout: 60
+          max-score: 0
+
+      # ── 6. Test: inference + output validation + performance metrics ─────────
+      #   Pass/fail: code.py runs without error AND output is semantically valid.
+      #   Metrics:   evaluate_performance.py always exits 0 — shown in logs only.
+      - name: Inference and performance
+        id: inference-and-performance
+        if: always()
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Inference and performance
+          setup-command: ""
+          command: >-
+            python submission/code.py
+            --input-path  evaluation/example/input_test.npy
+            --output-path /tmp/predictions.jsonl &&
+            python evaluation/evaluate_performance.py
+            --gt-path   evaluation/example/output_test.jsonl
+            --pred-path /tmp/predictions.jsonl
+          timeout: 180
+          max-score: 0
+
+      # ── 7. Upload artefacts ────────────────────────────────────────────────
+      - name: Upload evaluation artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-results-${{ github.run_id }}
+          path: |
+            /tmp/constraint_results.json
+            /tmp/predictions.jsonl
+          if-no-files-found: ignore
+
+      # ── 8. Report to Classroom dashboard ──────────────────────────────────
+      - name: Autograding Reporter
+        if: always()
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          SUBMISSION-FILES_RESULTS: "${{steps.submission-files.outputs.result}}"
+          REPORT-FILE_RESULTS: "${{steps.report-file.outputs.result}}"
+          ESP32-CONSTRAINTS_RESULTS: "${{steps.esp32-constraints.outputs.result}}"
+          INFERENCE-AND-PERFORMANCE_RESULTS: "${{steps.inference-and-performance.outputs.result}}"
+        with:
+          runners: submission-files,report-file,esp32-constraints,inference-and-performance

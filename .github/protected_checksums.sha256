@@ -1,0 +1,9 @@
+# Protected files — do not modify.
+# Regenerate with: sha256sum <file> and update this list.
+a9cc0d2e917c9a21591b2829a83952d10434c1d9bdea4001faf06b33550a6d01  evaluation/evaluate_constraint.py
+302c19b1b6800d0ce49e8ca1ffd7c9fcecf81a11e4fa9c5f4c80e777ede84edc  evaluation/evaluate_performance.py
+d4398e0d23a04a3c14b0fe72a9f2b715d7287fe2b5247c81cee7ac9cdadd7d60  evaluation/example/input_test.npy
+e057aedbb9755e485b5f5fdc2c143e8db3e6febaf168a286e6293b8edcd27494  evaluation/example/output_test.jsonl
+6f685df885049bae33128664b11e405c6f262d7e5bcb3cece1828429fb5334e1  .github/workflows/classroom.yml
+24933fdc71e9988edb6528eeccc4c8b363cd49deefbed42cb427e7c49f19a485  .github/workflows/check_integrity.yml
+02bbd44154767501e339489dc8dcd2637979cb67f708d5a75f9ff68332a5021f  requirements.txt

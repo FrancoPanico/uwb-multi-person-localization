@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "name": "Submission files present",
+      "slug": "submission-files",
+      "points": 0
+    },
+    {
+      "name": "Report file present",
+      "slug": "report-file",
+      "points": 0
+    },
+    {
+      "name": "ESP32-S3 hardware constraints",
+      "slug": "esp32-constraints",
+      "points": 0
+    },
+    {
+      "name": "Inference and performance",
+      "slug": "inference-and-performance",
+      "points": 0
+    }
+  ]
+}
